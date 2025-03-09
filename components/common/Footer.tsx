@@ -1,7 +1,7 @@
 "use client"
 import Link from 'next/link';
 import Image from 'next/image';
-import { FaMapMarkerAlt, FaPhoneAlt, FaClock } from 'react-icons/fa';
+import { FaMapMarkerAlt, FaPhoneAlt, FaClock, FaEnvelope } from 'react-icons/fa';
 
 export default function Footer() {
   return (
@@ -12,13 +12,13 @@ export default function Footer() {
             <div className="flex items-center mb-6">
               <Image
                 src="/images/logo.png"
-                alt="Ride Share"
-                width={40}
-                height={40}
-                className="mr-2"
+                width={48}
+                height={48}
+                alt="Mega City Cab"
+                className="w-12 h-12"
               />
               <span className="text-white text-xl font-bold">
-                <span className="text-amber-400">RIDE</span> SHARE
+                <span className="text-amber-400">MEGA</span> CITY CAB
               </span>
             </div>
             <p className="text-gray-400 mb-6">
@@ -59,12 +59,9 @@ export default function Footer() {
                 <FaPhoneAlt className="text-amber-400 mr-3" />
                 <span>+1 (555) 555 1234</span>
               </li>
-              <li className="flex items-center">
-                <svg className="w-4 h-4 text-amber-400 mr-3" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
-                  <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
-                </svg>
-                <span>info@rideshare.com</span>
+              <li className="flex items-center space-x-2">
+                <FaEnvelope className="text-amber-500" />
+                <span>info@megacitycab.com</span>
               </li>
               <li className="flex items-center">
                 <FaClock className="text-amber-400 mr-3" />
@@ -103,8 +100,8 @@ export default function Footer() {
         
         <div className="border-t border-gray-800 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
-            <p className="text-gray-500 text-sm">
-              &copy; {new Date().getFullYear()} Ride Share Luxury Rentals. All rights reserved.
+            <p className="text-sm text-gray-400">
+              &copy; {new Date().getFullYear()} Mega City Cab Luxury Rentals. All rights reserved.
             </p>
             <div className="flex space-x-6 mt-4 md:mt-0">
               <Link href="/privacy" className="text-gray-500 hover:text-gray-400 text-sm">Privacy Policy</Link>

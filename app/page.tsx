@@ -12,7 +12,7 @@ const luxuryBrands = [
   { name: 'Audi', logo: '/images/brands/audi-logo.png' },
   { name: 'Mercedes', logo: '/images/brands/mercedes-logo.png' },
   { name: 'Land Rover', logo: '/images/brands/landrover-logo.png' },
-  { name: 'Ferrari', logo: '/images/brands/ferrari-logo.png' },
+  { name: 'BMW', logo: '/images/brands/bmw-logo.png' },
   { name: 'Tesla', logo: '/images/brands/tesla-logo.png' },
 ];
 

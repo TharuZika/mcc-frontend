@@ -1,188 +1,210 @@
 "use client"
-import { useState } from 'react';
-import { FaSearch, FaCar, FaFilter, FaDollarSign, FaStar } from 'react-icons/fa';
-import Image from 'next/image';
+import { useState, useEffect } from 'react';
+import { FaSearch, FaFilter } from 'react-icons/fa';
+import { useRouter } from 'next/navigation';
+import { useAtom, useAtomValue } from 'jotai';
 import Header from '@/components/common/Header';
 import Footer from '@/components/common/Footer';
+import VehicleCard from '@/components/vehicle/VehicleCard';
+import { bookingDetailsAtom, selectedVehicleAtom } from '@/atoms/bookingAtoms';
 
-const rentalVehicles = [
-  {
-    id: 1,
-    name: 'Porsche 911',
-    type: 'Sports Car',
-    price: 299,
-    rating: 4.9,
-    image: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80',
-    features: ['Sport Mode', 'Leather Interior', 'Premium Sound'],
-    transmission: 'Automatic',
-    mileage: 'Unlimited'
-  },
-  {
-    id: 2,
-    name: 'Range Rover Sport',
-    type: 'Luxury SUV',
-    price: 250,
-    rating: 4.8,
-    image: 'https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80',
-    features: ['4x4', 'Panoramic Roof', 'Premium Sound'],
-    transmission: 'Automatic',
-    mileage: 'Unlimited'
-  },
-  {
-    id: 3,
-    name: 'Audi R8',
-    type: 'Sports Car',
-    price: 399,
-    rating: 5.0,
-    image: 'https://images.unsplash.com/photo-1603584173870-7f23fdae1b7a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80',
-    features: ['V10 Engine', 'Carbon Fiber', 'Sport Exhaust'],
-    transmission: 'Automatic',
-    mileage: '200 miles/day'
-  },
-];
+interface Vehicle {
+  id: number;
+  type: string;
+  seats: number;
+  model: string;
+  plateNo: string;
+  make: string;
+  year: number;
+  pricePerDay: number;
+  pricePerKm: number;
+  imgUrl: string;
+  status: string;
+  rent: boolean;
+  taxi: boolean;
+}
 
 export default function RentNow() {
+  const router = useRouter();
+  const bookingDetails = useAtomValue(bookingDetailsAtom);
+  const [, setSelectedVehicle] = useAtom(selectedVehicleAtom);
+  
+  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [filters, setFilters] = useState({
-    type: '',
-    priceRange: '',
-    transmission: '',
-    searchTerm: ''
+    search: '',
+    type: bookingDetails?.vehicleType || '',
+    minSeats: '',
+    maxPricePerDay: ''
   });
 
-  const filteredVehicles = rentalVehicles.filter(vehicle => {
-    if (filters.searchTerm && !vehicle.name.toLowerCase().includes(filters.searchTerm.toLowerCase())) {
-      return false;
+  // Redirect if no booking details
+  useEffect(() => {
+    if (!bookingDetails) {
+      router.push('/');
     }
-    if (filters.type && vehicle.type !== filters.type) {
-      return false;
+  }, [bookingDetails, router]);
+
+  const fetchVehicles = async () => {
+    try {
+      setLoading(true);
+      const queryParams = new URLSearchParams();
+      if (filters.search) queryParams.append('search', filters.search);
+      if (filters.type) queryParams.append('type', filters.type);
+      if (filters.minSeats) queryParams.append('minSeats', filters.minSeats);
+      if (filters.maxPricePerDay) queryParams.append('maxPricePerDay', filters.maxPricePerDay);
+
+      const response = await fetch(`http://localhost:8080/api/vehicles/rental?${queryParams}`);
+      const data = await response.json();
+      
+      if (data.status === 200) {
+        setVehicles(data.data);
+      } else {
+        setError(data.message || 'Failed to fetch vehicles');
+      }
+    } catch (err) {
+      setError('Failed to fetch vehicles. Please try again later.');
+    } finally {
+      setLoading(false);
     }
-    if (filters.transmission && vehicle.transmission !== filters.transmission) {
-      return false;
+  };
+
+  useEffect(() => {
+    fetchVehicles();
+  }, [filters]);
+
+  const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFilters(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleVehicleSelect = (vehicleId: number) => {
+    const vehicle = vehicles.find(v => v.id === vehicleId);
+    if (vehicle) {
+      setSelectedVehicle(vehicle);
+      router.push('/checkout');
     }
-    return true;
-  });
+  };
+
+  if (!bookingDetails) {
+    return null; // Will redirect in useEffect
+  }
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-gray-900 to-black text-white">
       <Header />
       
       <div className="container mx-auto px-4 pt-32 pb-16">
-        <h1 className="text-4xl font-bold mb-8">Rent a Car</h1>
-        
+        <h1 className="text-4xl font-bold mb-8">Rent a Vehicle</h1>
+
+        {/* Booking Summary */}
         <div className="bg-gray-800/50 rounded-xl p-6 mb-8">
-          <div className="flex flex-wrap gap-4">
-            <div className="flex-1 min-w-[200px]">
-              <div className="relative">
-                <FaSearch className="absolute left-3 top-3 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Search vehicles..."
-                  className="w-full bg-gray-700 text-white pl-10 pr-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
-                  value={filters.searchTerm}
-                  onChange={(e) => setFilters({...filters, searchTerm: e.target.value})}
-                />
-              </div>
+          <h2 className="text-xl font-semibold mb-4">Rental Details</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-gray-300">
+            <div>
+              <span className="block text-sm text-gray-400">Pickup Location</span>
+              <span className="block">{bookingDetails.pickupLocation}</span>
             </div>
-
-            <div className="w-full sm:w-auto">
-              <select
-                className="w-full bg-gray-700 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
-                value={filters.type}
-                onChange={(e) => setFilters({...filters, type: e.target.value})}
-              >
-                <option value="">Vehicle Type</option>
-                <option value="Sports Car">Sports Car</option>
-                <option value="Luxury SUV">Luxury SUV</option>
-                <option value="Luxury Sedan">Luxury Sedan</option>
-                <option value="Supercar">Supercar</option>
-              </select>
+            <div>
+              <span className="block text-sm text-gray-400">Rental Duration</span>
+              <span className="block">{bookingDetails.rentalDays} days</span>
             </div>
-
-            <div className="w-full sm:w-auto">
-              <select
-                className="w-full bg-gray-700 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
-                value={filters.transmission}
-                onChange={(e) => setFilters({...filters, transmission: e.target.value})}
-              >
-                <option value="">Transmission</option>
-                <option value="Automatic">Automatic</option>
-                <option value="Manual">Manual</option>
-              </select>
-            </div>
-
-            <div className="w-full sm:w-auto">
-              <select
-                className="w-full bg-gray-700 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
-                value={filters.priceRange}
-                onChange={(e) => setFilters({...filters, priceRange: e.target.value})}
-              >
-                <option value="">Price Range</option>
-                <option value="100-200">$100-$200/day</option>
-                <option value="200-300">$200-$300/day</option>
-                <option value="300+">$300+/day</option>
-              </select>
+            <div>
+              <span className="block text-sm text-gray-400">Vehicle Type</span>
+              <span className="block">{bookingDetails.vehicleType}</span>
             </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredVehicles.map((vehicle) => (
-            <div
-              key={vehicle.id}
-              className="bg-gray-800/50 rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300 hover:shadow-amber-500/10"
-            >
-              <div className="relative h-48">
-                <Image
-                  src={vehicle.image}
-                  alt={vehicle.name}
-                  fill
-                  className="object-cover"
-                />
-              </div>
-              <div className="p-6">
-                <div className="flex justify-between items-start mb-4">
-                  <div>
-                    <h3 className="text-xl font-bold mb-1">{vehicle.name}</h3>
-                    <p className="text-gray-400">{vehicle.type}</p>
-                  </div>
-                  <div className="flex items-center bg-amber-500/20 px-2 py-1 rounded">
-                    <FaStar className="text-amber-400 mr-1" />
-                    <span>{vehicle.rating}</span>
-                  </div>
-                </div>
-
-                <div className="flex flex-wrap gap-2 mb-4">
-                  {vehicle.features.map((feature, index) => (
-                    <span
-                      key={index}
-                      className="bg-gray-700 text-sm px-3 py-1 rounded-full text-gray-300"
-                    >
-                      {feature}
-                    </span>
-                  ))}
-                </div>
-
-                <div className="flex items-center justify-between mb-4 text-sm text-gray-400">
-                  <span>Transmission: {vehicle.transmission}</span>
-                  <span>Mileage: {vehicle.mileage}</span>
-                </div>
-
-                <div className="flex justify-between items-center">
-                  <div className="text-2xl font-bold text-amber-400">
-                    ${vehicle.price}
-                    <span className="text-sm text-gray-400">/day</span>
-                  </div>
-                  <button
-                    className="bg-amber-500 text-black px-6 py-2 rounded-lg font-bold hover:bg-amber-600 transition-colors"
-                    onClick={() => {console.log("Clicked")}}
-                  >
-                    Rent Now
-                  </button>
-                </div>
-              </div>
+        {/* Search and Filters */}
+        <div className="bg-gray-800/50 rounded-xl p-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            {/* Search */}
+            <div className="relative">
+              <FaSearch className="absolute left-3 top-3 text-gray-400" />
+              <input
+                type="text"
+                name="search"
+                placeholder="Search by make, model..."
+                className="w-full bg-gray-700 text-white pl-10 pr-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+                value={filters.search}
+                onChange={handleFilterChange}
+              />
             </div>
-          ))}
+
+            {/* Vehicle Type */}
+            <div className="relative">
+              <select
+                name="type"
+                className="w-full bg-gray-700 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+                value={filters.type}
+                onChange={handleFilterChange}
+              >
+                <option value="">All Types</option>
+                <option value="CAR">Car</option>
+                <option value="SUV">SUV</option>
+                <option value="VAN">Van</option>
+              </select>
+            </div>
+
+            {/* Min Seats */}
+            <div className="relative">
+              <input
+                type="number"
+                name="minSeats"
+                placeholder="Min Seats"
+                className="w-full bg-gray-700 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+                value={filters.minSeats}
+                onChange={handleFilterChange}
+                min="1"
+              />
+            </div>
+
+            {/* Max Price per Day */}
+            <div className="relative">
+              <input
+                type="number"
+                name="maxPricePerDay"
+                placeholder="Max Price per Day"
+                className="w-full bg-gray-700 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+                value={filters.maxPricePerDay}
+                onChange={handleFilterChange}
+                min="0"
+              />
+            </div>
+          </div>
         </div>
+
+        {/* Vehicle Grid */}
+        {loading ? (
+          <div className="text-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-amber-500 mx-auto"></div>
+            <p className="mt-4 text-gray-400">Loading vehicles...</p>
+          </div>
+        ) : error ? (
+          <div className="text-center py-12">
+            <p className="text-red-500">{error}</p>
+          </div>
+        ) : vehicles.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-gray-400">No vehicles found matching your criteria.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {vehicles.map(vehicle => (
+              <VehicleCard
+                key={vehicle.id}
+                vehicle={vehicle}
+                onSelect={handleVehicleSelect}
+                mode="rental"
+              />
+            ))}
+          </div>
+        )}
       </div>
 
       <Footer />

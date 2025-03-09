@@ -2,17 +2,23 @@
 import { useState } from 'react';
 import { FaUser, FaEnvelope, FaLock, FaPhone, FaGoogle, FaFacebook } from 'react-icons/fa';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import axios from 'axios';
 
 export default function Register() {
+  const router = useRouter();
   const [registerDetails, setRegisterDetails] = useState({
+    username: '',
     firstName: '',
     lastName: '',
     email: '',
-    phone: '',
+    mobileNo: '',
     password: '',
     confirmPassword: '',
     agreeToTerms: false
   });
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -22,9 +28,36 @@ export default function Register() {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Registration details:', registerDetails);
+    setError('');
+    setLoading(true);
+
+    // Validate passwords match
+    if (registerDetails.password !== registerDetails.confirmPassword) {
+      setError('Passwords do not match');
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const response = await axios.post('http://localhost:8080/api/auth/register', {
+        username: registerDetails.username,
+        password: registerDetails.password,
+        firstName: registerDetails.firstName,
+        lastName: registerDetails.lastName,
+        email: registerDetails.email,
+        mobileNo: registerDetails.mobileNo
+      });
+
+      if (response.data) {
+        router.push('/login'); // Redirect to login page after successful registration
+      }
+    } catch (error: any) {
+      setError(error.response?.data?.message || 'Registration failed. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -34,8 +67,28 @@ export default function Register() {
           <div className="bg-gray-800/50 rounded-xl p-8">
             <h1 className="text-3xl font-bold text-center mb-8">Create Account</h1>
             
+            {error && (
+              <div className="bg-red-500/10 border border-red-500 text-red-500 px-4 py-2 rounded-lg mb-6">
+                {error}
+              </div>
+            )}
+            
             <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Username Input */}
+              <div className="relative">
+                <FaUser className="absolute left-3 top-3 text-amber-400" />
+                <input
+                  type="text"
+                  name="username"
+                  placeholder="Username"
+                  className="w-full bg-gray-700 text-white pl-10 pr-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  value={registerDetails.username}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
 
+              {/* Name Inputs */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="relative">
                   <FaUser className="absolute left-3 top-3 text-amber-400" />
@@ -63,6 +116,7 @@ export default function Register() {
                 </div>
               </div>
 
+              {/* Email Input */}
               <div className="relative">
                 <FaEnvelope className="absolute left-3 top-3 text-amber-400" />
                 <input
@@ -76,19 +130,21 @@ export default function Register() {
                 />
               </div>
 
+              {/* Phone Input */}
               <div className="relative">
                 <FaPhone className="absolute left-3 top-3 text-amber-400" />
                 <input
                   type="tel"
-                  name="phone"
+                  name="mobileNo"
                   placeholder="Phone Number"
                   className="w-full bg-gray-700 text-white pl-10 pr-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
-                  value={registerDetails.phone}
+                  value={registerDetails.mobileNo}
                   onChange={handleInputChange}
                   required
                 />
               </div>
 
+              {/* Password Inputs */}
               <div className="relative">
                 <FaLock className="absolute left-3 top-3 text-amber-400" />
                 <input
@@ -115,6 +171,7 @@ export default function Register() {
                 />
               </div>
 
+              {/* Terms and Conditions */}
               <div className="flex items-start space-x-2">
                 <input
                   type="checkbox"
@@ -136,13 +193,16 @@ export default function Register() {
                 </label>
               </div>
 
+              {/* Register Button */}
               <button
                 type="submit"
-                className="w-full bg-amber-500 text-black py-3 rounded-lg font-bold text-lg hover:bg-amber-600 transition-colors"
+                disabled={loading}
+                className="w-full bg-amber-500 text-black py-3 rounded-lg font-bold text-lg hover:bg-amber-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Create Account
+                {loading ? 'Creating Account...' : 'Create Account'}
               </button>
 
+              {/* Social Login Divider */}
               <div className="relative my-8">
                 <div className="absolute inset-0 flex items-center">
                   <div className="w-full border-t border-gray-600"></div>
@@ -152,6 +212,7 @@ export default function Register() {
                 </div>
               </div>
 
+              {/* Social Login Buttons */}
               <div className="grid grid-cols-2 gap-4">
                 <button
                   type="button"
@@ -169,6 +230,7 @@ export default function Register() {
                 </button>
               </div>
 
+              {/* Login Link */}
               <p className="text-center text-gray-400">
                 Already have an account?{' '}
                 <Link href="/login" className="text-amber-400 hover:text-amber-300">
