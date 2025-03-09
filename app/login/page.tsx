@@ -1,116 +1,125 @@
 "use client"
-import React from 'react';
 import { useState } from 'react';
-import { Eye, EyeOff, Car } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import axios from 'axios';
+import { FaEnvelope, FaLock, FaGoogle, FaFacebook } from 'react-icons/fa';
+import Link from 'next/link';
+import Header from '@/components/common/Header';
+import Footer from '@/components/common/Footer';
 
-const page = () => {
-  const [showPassword, setShowPassword] = useState(false);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const router = useRouter();
+export default function Login() {
+  const [loginDetails, setLoginDetails] = useState({
+    email: '',
+    password: '',
+    rememberMe: false
+  });
 
-  const handleSubmit = (e : any) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value, type, checked } = e.target;
+    setLoginDetails(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value
+    }));
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    axios.post("http://localhost:8080/auth/login", {
-        body: { email, password }
-    })
-    router.push("/");
-    console.log('Login attempted with:', { email, password });
+    console.log('Login details:', loginDetails);
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-purple-900/90 to-blue-900/90 bg-cover bg-center bg-no-repeat" style={{
-      backgroundImage: "url(https://img.freepik.com/free-vector/modern-futuristic-black-blue-esport-background_331749-862.jpg?t=st=1739077613~exp=1739081213~hmac=780214775b258f87a1fdc4e7639d43054ebef2ef1844c5a93565264dfb7ff0c3&w=1920)"
-    }}>
-      <div className="w-full max-w-md p-8 mx-4 bg-white rounded-2xl shadow-2xl space-y-8 backdrop-blur-sm bg-white/90">
-        {/* Logo and Header */}
-        <div className="text-center space-y-2">
-          <div className="flex justify-center">
-            <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-3 rounded-full">
-              <Car size={32} className="text-white" />
-            </div>
-          </div>
-          <h1 className="text-2xl font-bold text-gray-900">Mega City Cab</h1>
-          <p className="text-gray-500">Sign in to your account</p>
-        </div>
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black text-white">
+      
+      <div className="container mx-auto px-4 pt-32 pb-16">
+        <div className="max-w-md mx-auto">
+          <div className="bg-gray-800/50 rounded-xl p-8">
+            <h1 className="text-3xl font-bold text-center mb-8">Welcome Back</h1>
+            
+            <form onSubmit={handleSubmit} className="space-y-6">
 
-        {/* Login Form */}
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="space-y-2">
-            <label htmlFor="email" className="text-sm font-medium text-gray-700">
-              Email address
-            </label>
-            <input
-              type="email"
-              id="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
-              placeholder="Enter your email"
-              required
-            />
-          </div>
+              <div className="relative">
+                <FaEnvelope className="absolute left-3 top-3 text-amber-400" />
+                <input
+                  type="email"
+                  name="email"
+                  placeholder="Email Address"
+                  className="w-full bg-gray-700 text-white pl-10 pr-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  value={loginDetails.email}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
 
-          <div className="space-y-2">
-            <label htmlFor="password" className="text-sm font-medium text-gray-700">
-              Password
-            </label>
-            <div className="relative">
-              <input
-                type={showPassword ? "text" : "password"}
-                id="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
-                placeholder="Enter your password"
-                required
-              />
+              <div className="relative">
+                <FaLock className="absolute left-3 top-3 text-amber-400" />
+                <input
+                  type="password"
+                  name="password"
+                  placeholder="Password"
+                  className="w-full bg-gray-700 text-white pl-10 pr-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  value={loginDetails.password}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+
+              <div className="flex items-center justify-between text-sm">
+                <label className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    name="rememberMe"
+                    checked={loginDetails.rememberMe}
+                    onChange={handleInputChange}
+                    className="rounded bg-gray-700 border-gray-600 text-amber-500 focus:ring-amber-500"
+                  />
+                  <span>Remember me</span>
+                </label>
+                <Link href="/forgot-password" className="text-amber-400 hover:text-amber-300">
+                  Forgot Password?
+                </Link>
+              </div>
+
               <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                type="submit"
+                className="w-full bg-amber-500 text-black py-3 rounded-lg font-bold text-lg hover:bg-amber-600 transition-colors"
               >
-                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                Login
               </button>
-            </div>
+
+              <div className="relative my-8">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-600"></div>
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-4 bg-gray-800/50 text-gray-400">Or continue with</span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <button
+                  type="button"
+                  className="flex items-center justify-center space-x-2 bg-gray-700 py-2 rounded-lg hover:bg-gray-600 transition-colors"
+                >
+                  <FaGoogle className="text-red-500" />
+                  <span>Google</span>
+                </button>
+                <button
+                  type="button"
+                  className="flex items-center justify-center space-x-2 bg-gray-700 py-2 rounded-lg hover:bg-gray-600 transition-colors"
+                >
+                  <FaFacebook className="text-blue-500" />
+                  <span>Facebook</span>
+                </button>
+              </div>
+
+              <p className="text-center text-gray-400">
+                Don't have an account?{' '}
+                <Link href="/register" className="text-amber-400 hover:text-amber-300">
+                  Register
+                </Link>
+              </p>
+            </form>
           </div>
-
-          <div className="flex items-center justify-between text-sm">
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="remember"
-                className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-              />
-              <label htmlFor="remember" className="ml-2 text-gray-600">
-                Remember me
-              </label>
-            </div>
-            <a href="#" className="text-blue-600 hover:text-blue-700 font-medium">
-              Forgot password?
-            </a>
-          </div>
-
-          <button
-            type="submit"
-            className="w-full py-3 px-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
-          >
-            Sign in
-          </button>
-        </form>
-
-        {/* Sign up link */}
-        <p className="text-center text-sm text-gray-600">
-          Don't have an account?{' '}
-          <a href="#" className="text-blue-600 hover:text-blue-700 font-medium">
-            Sign up
-          </a>
-        </p>
+        </div>
       </div>
     </div>
   );
-};
-
-export default page;
+}
