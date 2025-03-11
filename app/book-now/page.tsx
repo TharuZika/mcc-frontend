@@ -40,11 +40,11 @@ export default function BookNow() {
   });
 
   // Redirect if no booking details
-  useEffect(() => {
-    if (!bookingDetails) {
-      router.push('/');
-    }
-  }, [bookingDetails, router]);
+  // useEffect(() => {
+  //   if (!bookingDetails) {
+  //     router.push('/');
+  //   }
+  // }, [bookingDetails, router]);
 
   const fetchVehicles = async () => {
     try {
@@ -55,7 +55,7 @@ export default function BookNow() {
       if (filters.minSeats) queryParams.append('minSeats', filters.minSeats);
       if (filters.maxPrice) queryParams.append('maxPrice', filters.maxPrice);
 
-      const response = await fetch(`http://localhost:8080/api/vehicles/taxi?${queryParams}`);
+      const response = await fetch(`http://localhost:8080/api/vehicles/taxi`);
       const data = await response.json();
       
       if (data.status === 200) {
@@ -90,9 +90,9 @@ export default function BookNow() {
     }
   };
 
-  if (!bookingDetails) {
-    return null; // Will redirect in useEffect
-  }
+  // if (!bookingDetails) {
+  //   return null; // Will redirect in useEffect
+  // }
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-gray-900 to-black text-white">
@@ -107,21 +107,21 @@ export default function BookNow() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-gray-300">
             <div>
               <span className="block text-sm text-gray-400">Pickup Location</span>
-              <span className="block">{bookingDetails.pickupLocation}</span>
+              <span className="block">{bookingDetails?.pickupLocation}</span>
             </div>
             <div>
               <span className="block text-sm text-gray-400">Drop-off Location</span>
-              <span className="block">{bookingDetails.dropLocation}</span>
+              <span className="block">{bookingDetails?.dropLocation}</span>
             </div>
             <div>
               <span className="block text-sm text-gray-400">Pickup Date & Time</span>
               <span className="block">
-                {bookingDetails.pickupDate} at {bookingDetails.pickupTime}
+                {bookingDetails?.pickupDate} at {bookingDetails?.pickupTime}
               </span>
             </div>
             <div>
               <span className="block text-sm text-gray-400">Vehicle Type</span>
-              <span className="block">{bookingDetails.vehicleType}</span>
+              <span className="block">{bookingDetails?.vehicleType}</span>
             </div>
           </div>
         </div>

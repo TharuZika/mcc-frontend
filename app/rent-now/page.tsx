@@ -40,11 +40,11 @@ export default function RentNow() {
   });
 
   // Redirect if no booking details
-  useEffect(() => {
-    if (!bookingDetails) {
-      router.push('/');
-    }
-  }, [bookingDetails, router]);
+  // useEffect(() => {
+  //   if (!bookingDetails) {
+  //     router.push('/');
+  //   }
+  // }, [bookingDetails, router]);
 
   const fetchVehicles = async () => {
     try {
@@ -90,9 +90,9 @@ export default function RentNow() {
     }
   };
 
-  if (!bookingDetails) {
-    return null; // Will redirect in useEffect
-  }
+  // if (!bookingDetails) {
+  //   return null; // Will redirect in useEffect
+  // }
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-gray-900 to-black text-white">
@@ -107,15 +107,15 @@ export default function RentNow() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-gray-300">
             <div>
               <span className="block text-sm text-gray-400">Pickup Location</span>
-              <span className="block">{bookingDetails.pickupLocation}</span>
+              <span className="block">{bookingDetails?.pickupLocation}</span>
             </div>
             <div>
               <span className="block text-sm text-gray-400">Rental Duration</span>
-              <span className="block">{bookingDetails.rentalDays} days</span>
+              <span className="block">{bookingDetails?.rentalDays} days</span>
             </div>
             <div>
               <span className="block text-sm text-gray-400">Vehicle Type</span>
-              <span className="block">{bookingDetails.vehicleType}</span>
+              <span className="block">{bookingDetails?.vehicleType}</span>
             </div>
           </div>
         </div>

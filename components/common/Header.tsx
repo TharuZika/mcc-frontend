@@ -20,15 +20,15 @@ export default function Header() {
                 <div className="relative w-10 h-10 mr-2 overflow-hidden">
                   <Image
                     src="/images/logo.png"
-                    width={48}
-                    height={48}
+                    width={64}
+                    height={64}
                     alt="Mega City Cab"
                     className="w-12 h-12"
                   />
                 </div>
-                <span className="text-white text-xl font-bold tracking-wider">
+                {/* <span className="text-white text-xl font-bold tracking-wider">
                   <span className="text-amber-400">MEGA</span> CITY CAB
-                </span>
+                </span> */}
               </Link>
             </div>
             <div className="hidden md:flex items-center space-x-8">

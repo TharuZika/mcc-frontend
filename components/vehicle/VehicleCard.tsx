@@ -46,7 +46,7 @@ export default function VehicleCard({ vehicle, mode }: VehicleCardProps) {
         {/* Vehicle Image */}
         <div className="relative h-48 overflow-hidden">
           <Image
-            src={vehicle.imgUrl}
+            src={vehicle.imgUrl || "/images/logo.png"}
             alt={`${vehicle.make} ${vehicle.model}`}
             fill
             className="object-cover group-hover:scale-110 transition-transform duration-500"
