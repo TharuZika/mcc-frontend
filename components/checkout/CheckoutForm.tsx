@@ -7,6 +7,7 @@ import {
 } from '@stripe/react-stripe-js';
 import { useRouter } from 'next/navigation';
 import { useAtomValue } from 'jotai';
+import { useSession } from 'next-auth/react';
 import { bookingDetailsAtom, selectedVehicleAtom } from '@/atoms/bookingAtoms';
 
 const cardStyle = {
@@ -28,6 +29,8 @@ const cardStyle = {
   }
 };
 
+const SPRING_BOOT_API = 'http://localhost:8080/api'; // Update this with your Spring Boot API URL
+
 export default function CheckoutForm() {
   const stripe = useStripe();
   const elements = useElements();
@@ -37,11 +40,17 @@ export default function CheckoutForm() {
   
   const bookingDetails = useAtomValue(bookingDetailsAtom);
   const selectedVehicle = useAtomValue(selectedVehicleAtom);
+  const { data: session } = useSession();
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
     if (!stripe || !elements) {
+      return;
+    }
+
+    if (!session?.accessToken) {
+      setError('Please login to continue');
       return;
     }
 
@@ -64,17 +73,34 @@ export default function CheckoutForm() {
         ? (selectedVehicle?.pricePerDay || 0) * (bookingDetails?.rentalDays || 1)
         : (selectedVehicle?.pricePerKm || 0) * 10; // Dummy distance for taxi
 
-      // Simulate API call to backend
-      const bookingResponse = await fetch('/api/bookings', {
+      // Send booking request to Spring Boot backend
+      const bookingResponse = await fetch(`${SPRING_BOOT_API}/bookings`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${session.accessToken}`,
         },
         body: JSON.stringify({
           paymentMethod: "CARD",
-          cardToken: "paymentMethod.id",
-          bookingDetails,
-          selectedVehicle,
+          cardToken: paymentMethod.id,
+          bookingDetails: {
+            serviceType: bookingDetails?.serviceType,
+            pickupLocation: bookingDetails?.pickupLocation,
+            dropLocation: bookingDetails?.dropLocation,
+            pickupDate: bookingDetails?.pickupDate,
+            pickupTime: bookingDetails?.pickupTime,
+            rentalDays: bookingDetails?.rentalDays,
+            vehicleType: bookingDetails?.vehicleType
+          },
+          vehicle: {
+            id: selectedVehicle?.id,
+            make: selectedVehicle?.make,
+            model: selectedVehicle?.model,
+            type: selectedVehicle?.type,
+            pricePerDay: selectedVehicle?.pricePerDay,
+            pricePerKm: selectedVehicle?.pricePerKm
+          },
           totalAmount,
           customerDetails: {
             name: 'John Doe',
@@ -86,12 +112,15 @@ export default function CheckoutForm() {
       });
 
       if (!bookingResponse.ok) {
-        throw new Error('Failed to process booking');
+        const errorData = await bookingResponse.json();
+        throw new Error(errorData.message || 'Failed to process booking');
       }
 
-      // Simulate successful booking
+      const bookingResult = await bookingResponse.json();
+
+      // Store booking data in localStorage for the success page
       const bookingData = {
-        bookingId: 'BK' + Math.random().toString(36).substr(2, 9).toUpperCase(),
+        bookingId: bookingResult.id || 'BK' + Math.random().toString(36).substr(2, 9).toUpperCase(),
         timestamp: new Date().toISOString(),
         totalAmount,
         customerDetails: {
@@ -103,7 +132,6 @@ export default function CheckoutForm() {
         selectedVehicle,
       };
 
-      // Store booking data in localStorage for the success page
       localStorage.setItem('bookingData', JSON.stringify(bookingData));
       
       // Redirect to success page

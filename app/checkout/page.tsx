@@ -249,7 +249,7 @@ export default function Checkout() {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-300">Estimated Distance</span>
-                      <span className="font-medium">Calculating...</span>
+                      <span className="font-medium">13KM</span>
                     </div>
                   </>
                 ) : (
@@ -270,7 +270,7 @@ export default function Checkout() {
                     <span className="font-bold text-amber-500">
                       Rs. {bookingDetails.serviceType === 'rental'
                         ? (selectedVehicle.pricePerDay! * bookingDetails.rentalDays!).toFixed(2)
-                        : 'Calculating...'
+                        : {(selectedVehicle.pricePerKm! * 13).toFixed(2)}
                       }
                     </span>
                   </div>

@@ -1,27 +1,21 @@
 "use client"
 import { useState } from 'react';
-import { FaEnvelope, FaLock, FaGoogle, FaFacebook, FaUser } from 'react-icons/fa';
-import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { signIn } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
-export default function Login() {
+const SPRING_BOOT_API = 'http://localhost:8080/api';
+
+export default function LoginPage() {
   const router = useRouter();
-  const [loginDetails, setLoginDetails] = useState({
-    username: '',
-    password: '',
-    rememberMe: false
-  });
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get('callbackUrl') || '/';
+
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type, checked } = e.target;
-    setLoginDetails(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value
-    }));
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,130 +24,94 @@ export default function Login() {
 
     try {
       const result = await signIn('credentials', {
-        username: loginDetails.username,
-        password: loginDetails.password,
+        username: email,
+        password: password,
         redirect: false,
       });
 
       if (result?.error) {
-        setError('Invalid username or password');
-      } else {
-        router.push('/'); // Redirect to home page after successful login
+        setError('Invalid email or password');
+        return;
       }
-    } catch (error) {
-      setError('An error occurred during login');
+
+      router.push(decodeURIComponent(callbackUrl));
+      router.refresh();
+    } catch (err: any) {
+      setError(err.message || 'An error occurred during login');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black text-white">
+    <main className="min-h-screen bg-gradient-to-br from-gray-900 to-black">
+      
       <div className="container mx-auto px-4 pt-32 pb-16">
         <div className="max-w-md mx-auto">
-          <div className="bg-gray-800/50 rounded-xl p-8">
-            <h1 className="text-3xl font-bold text-center mb-8">Welcome Back</h1>
-            
-            {error && (
-              <div className="bg-red-500/10 border border-red-500 text-red-500 px-4 py-2 rounded-lg mb-6">
-                {error}
-              </div>
-            )}
+          <div className="bg-white/10 backdrop-blur-md rounded-xl p-8 shadow-lg">
+            <h1 className="text-3xl font-bold text-white mb-6 text-center">Login</h1>
             
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Username Input */}
-              <div className="relative">
-                <FaUser className="absolute left-3 top-3 text-amber-400" />
-                <input
-                  type="text"
-                  name="username"
-                  placeholder="Username"
-                  className="w-full bg-gray-700 text-white pl-10 pr-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
-                  value={loginDetails.username}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-
-              {/* Password Input */}
-              <div className="relative">
-                <FaLock className="absolute left-3 top-3 text-amber-400" />
-                <input
-                  type="password"
-                  name="password"
-                  placeholder="Password"
-                  className="w-full bg-gray-700 text-white pl-10 pr-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
-                  value={loginDetails.password}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-
-              {/* Remember Me & Forgot Password */}
-              <div className="flex items-center justify-between text-sm">
-                <label className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    name="rememberMe"
-                    checked={loginDetails.rememberMe}
-                    onChange={handleInputChange}
-                    className="rounded bg-gray-700 border-gray-600 text-amber-500 focus:ring-amber-500"
-                  />
-                  <span>Remember me</span>
+              <div>
+                <label htmlFor="email" className="block text-sm font-medium text-gray-200 mb-2">
+                  Email Address
                 </label>
-                <Link href="/forgot-password" className="text-amber-400 hover:text-amber-300">
-                  Forgot Password?
-                </Link>
+                <input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  className="w-full px-4 py-3 rounded-lg bg-white/10 border border-gray-600 text-white placeholder-gray-400 focus:outline-none focus:border-amber-500 transition-colors"
+                  placeholder="Enter your email"
+                />
               </div>
 
-              {/* Login Button */}
+              <div>
+                <label htmlFor="password" className="block text-sm font-medium text-gray-200 mb-2">
+                  Password
+                </label>
+                <input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  className="w-full px-4 py-3 rounded-lg bg-white/10 border border-gray-600 text-white placeholder-gray-400 focus:outline-none focus:border-amber-500 transition-colors"
+                  placeholder="Enter your password"
+                />
+              </div>
+
+              {error && (
+                <div className="text-red-500 text-sm text-center">
+                  {error}
+                </div>
+              )}
+
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-amber-500 text-black py-3 rounded-lg font-bold text-lg hover:bg-amber-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-gradient-to-r from-amber-500 to-amber-600 text-black py-4 rounded-lg font-bold hover:from-amber-600 hover:to-amber-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? 'Logging in...' : 'Login'}
               </button>
+            </form>
 
-              {/* Social Login Divider */}
-              <div className="relative my-8">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-gray-600"></div>
-                </div>
-                <div className="relative flex justify-center text-sm">
-                  <span className="px-4 bg-gray-800/50 text-gray-400">Or continue with</span>
-                </div>
-              </div>
-
-              {/* Social Login Buttons */}
-              <div className="grid grid-cols-2 gap-4">
-                <button
-                  type="button"
-                  className="flex items-center justify-center space-x-2 bg-gray-700 py-2 rounded-lg hover:bg-gray-600 transition-colors"
-                >
-                  <FaGoogle className="text-red-500" />
-                  <span>Google</span>
-                </button>
-                <button
-                  type="button"
-                  className="flex items-center justify-center space-x-2 bg-gray-700 py-2 rounded-lg hover:bg-gray-600 transition-colors"
-                >
-                  <FaFacebook className="text-blue-500" />
-                  <span>Facebook</span>
-                </button>
-              </div>
-
-              {/* Register Link */}
-              <p className="text-center text-gray-400">
+            <div className="mt-6 text-center">
+              <p className="text-gray-400">
                 Don't have an account?{' '}
-                <Link href="/register" className="text-amber-400 hover:text-amber-300">
+                <Link 
+                  href={`/register?callbackUrl=${encodeURIComponent(callbackUrl)}`}
+                  className="text-amber-500 hover:text-amber-400 font-medium"
+                >
                   Register
                 </Link>
               </p>
-            </form>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+
+    </main>
   );
 }

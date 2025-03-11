@@ -4,13 +4,18 @@ import { FaCar, FaClock, FaMapMarkerAlt } from 'react-icons/fa';
 import { useSetAtom } from 'jotai';
 import { useRouter } from 'next/navigation';
 import { bookingDetailsAtom } from '@/atoms/bookingAtoms';
+import { Autocomplete } from '@react-google-maps/api';
 
 export default function BookingForm() {
   const router = useRouter();
   const setBookingDetails = useSetAtom(bookingDetailsAtom);
   
   const [location, setLocation] = useState('');
+  const [latitude, setLatitude] = useState(0);
+  const [longitude, setLongitude] = useState(0);
   const [dropLocation, setDropLocation] = useState('');
+  const [dropLatitude, setDropLatitude] = useState(0);
+  const [dropLongitude, setDropLongitude] = useState(0);
   const [serviceType, setServiceType] = useState('taxi');
   const [rentalDays, setRentalDays] = useState(1);
   const [pickupDate, setPickupDate] = useState('');
@@ -47,6 +52,22 @@ export default function BookingForm() {
     });
 
     router.push(serviceType === 'taxi' ? '/book-now' : '/rent-now');
+  };
+
+  const handleDropLocationSelect = (autocomplete: any) => {
+    const place = autocomplete.getPlace();
+    if (place.geometry) {
+      setDropLatitude(place.geometry.location.lat());
+      setDropLongitude(place.geometry.location.lng());
+    }
+  };
+
+  const handleLocationSelect = (autocomplete: any) => {
+    const place = autocomplete.getPlace();
+    if (place.geometry) {
+      setLatitude(place.geometry.location.lat());
+      setLongitude(place.geometry.location.lng());
+    }
   };
 
   return (
@@ -89,13 +110,26 @@ export default function BookingForm() {
           <label className="block text-sm font-medium mb-2 text-gray-300">Pickup Location</label>
           <div className="relative">
             <FaMapMarkerAlt className="absolute left-3 top-3 text-amber-400 z-10" />
-            <input
+            
+            <Autocomplete
+                onLoad={(autocomplete) =>
+                  autocomplete.addListener("place_changed", () => {
+                    const place = autocomplete.getPlace();
+                    if (place.formatted_address) {
+                      setLocation(place.formatted_address);
+                      handleLocationSelect(autocomplete);
+                    }
+                  })
+                }
+              >
+                <input
               type="text"
               placeholder="Enter pickup location"
               value={location}
               onChange={(e) => setLocation(e.target.value)}
               className="w-full bg-white/10 border border-gray-600 text-white p-2 pl-10 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
             />
+              </Autocomplete>
           </div>
         </div>
 
@@ -133,13 +167,26 @@ export default function BookingForm() {
               <label className="block text-sm font-medium mb-2 text-gray-300">Drop-off Location</label>
               <div className="relative">
                 <FaMapMarkerAlt className="absolute left-3 top-3 text-amber-400 z-10" />
+                <Autocomplete
+                onLoad={(autocomplete) =>
+                  autocomplete.addListener("place_changed", () => {
+                    const place = autocomplete.getPlace();
+                    if (place.formatted_address) {
+                      setDropLocation(place.formatted_address);
+                      handleDropLocationSelect(autocomplete);
+                    }
+                  })
+                }
+              >
                 <input
                   type="text"
-                  placeholder="Enter drop-off location"
+                  placeholder="Enter Location"
                   value={dropLocation}
-                  onChange={(e) => setDropLocation(e.target.value)}
                   className="w-full bg-white/10 border border-gray-600 text-white p-2 pl-10 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                  onChange={(e) => setDropLocation(e.target.value)}
                 />
+              </Autocomplete>
+                
               </div>
             </div>
           </>

@@ -17,13 +17,13 @@ export default function Header() {
           <div className="flex justify-between items-center h-20">
             <div className="flex items-center">
               <Link href="/" className="flex items-center group">
-                <div className="relative w-10 h-10 mr-2 overflow-hidden">
+                <div className="relative mr-2 overflow-hidden">
                   <Image
                     src="/images/logo.png"
                     width={64}
                     height={64}
                     alt="Mega City Cab"
-                    className="w-12 h-12"
+                    className="w-24 h-24"
                   />
                 </div>
                 {/* <span className="text-white text-xl font-bold tracking-wider">
@@ -39,9 +39,6 @@ export default function Header() {
               >
                 FLEET
               </button>
-              <Link href="/about" className="text-white hover:text-amber-400 transition-colors duration-300 text-sm font-medium tracking-wider">ABOUT US</Link>
-              <Link href="/blog" className="text-white hover:text-amber-400 transition-colors duration-300 text-sm font-medium tracking-wider">BLOG</Link>
-              <Link href="/contact" className="text-white hover:text-amber-400 transition-colors duration-300 text-sm font-medium tracking-wider">CONTACT</Link>
               <div className="flex items-center text-amber-300 pl-4 border-l border-gray-700">
                 <FaPhoneAlt className="mr-2 animate-pulse" />
                 <span className="font-semibold">+1 (555) 555 1234</span>
