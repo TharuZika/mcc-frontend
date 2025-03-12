@@ -38,7 +38,7 @@ export default function MyBookingsPage() {
 
     const fetchBookings = async () => {
       try {
-        const response = await fetch(`${SPRING_BOOT_API}/bookings/user`, {
+        const response = await fetch(`${SPRING_BOOT_API}/bookings`, {
           headers: {
             'Authorization': `Bearer ${session.accessToken}`,
             'Accept': 'application/json',
