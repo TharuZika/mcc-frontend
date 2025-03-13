@@ -23,7 +23,7 @@ interface CustomerDetails {
   zipCode: string;
 }
 
-export default function Checkout() {
+export default function CheckoutPage() {
   const router = useRouter();
   const bookingDetails = useAtomValue(bookingDetailsAtom);
   const selectedVehicle = useAtomValue(selectedVehicleAtom);
@@ -39,12 +39,7 @@ export default function Checkout() {
     zipCode: ''
   });
 
-  // Redirect if no booking details or selected vehicle
-  useEffect(() => {
-    if (!bookingDetails || !selectedVehicle) {
-      router.push('/');
-    }
-  }, [bookingDetails, selectedVehicle, router]);
+
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -54,12 +49,25 @@ export default function Checkout() {
     }));
   };
 
-  if (!bookingDetails || !selectedVehicle) {
-    return null; // Will redirect in useEffect
-  }
+
+  // Calculate total amount
+  const calculateTotal = () => {
+    if (bookingDetails?.serviceType === 'taxi') {
+      // For taxi, we'll use a dummy distance of 10km for the mock data
+      const estimatedDistance = 10;
+      return Number(selectedVehicle?.pricePerKm || 0) * estimatedDistance;
+    } else {
+      // For rental, calculate based on days
+      return Number(selectedVehicle?.pricePerDay || 0) * Number(bookingDetails?.rentalDays || 1);
+    }
+  };
+
+  const total = calculateTotal();
+  const tax = total * 0.1; // 10% tax
+  const grandTotal = total + tax;
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-gray-900 to-black text-white">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black text-white">
       <Header />
       
       <div className="container mx-auto px-4 pt-32 pb-16">
@@ -69,7 +77,7 @@ export default function Checkout() {
           {/* Left Column - Forms */}
           <div className="space-y-8">
             {/* Customer Details */}
-            <div className="bg-gray-800/50 rounded-xl p-6">
+            <div className="bg-white/10 backdrop-blur-md rounded-xl p-6">
               <h2 className="text-xl font-semibold mb-6">Customer Details</h2>
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -118,11 +126,11 @@ export default function Checkout() {
                 </div>
                 <div className="col-span-2">
                   <label className="block text-sm font-medium text-gray-300 mb-2">Address</label>
-                  <textarea
+                  <input
+                    type="text"
                     name="address"
                     value={customerDetails.address}
                     onChange={handleInputChange}
-                    rows={3}
                     className="w-full bg-white/10 border border-gray-600 text-white p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
                     required
                   />
@@ -149,7 +157,7 @@ export default function Checkout() {
                     required
                   />
                 </div>
-                <div>
+                <div className="col-span-2">
                   <label className="block text-sm font-medium text-gray-300 mb-2">ZIP Code</label>
                   <input
                     type="text"
@@ -164,7 +172,7 @@ export default function Checkout() {
             </div>
 
             {/* Payment Details */}
-            <div className="bg-gray-800/50 rounded-xl p-6">
+            <div className="bg-white/10 backdrop-blur-md rounded-xl p-6">
               <h2 className="text-xl font-semibold mb-6">Payment Details</h2>
               <Elements stripe={stripePromise}>
                 <CheckoutForm />
@@ -175,7 +183,7 @@ export default function Checkout() {
           {/* Right Column - Summary */}
           <div className="space-y-8">
             {/* Vehicle Details */}
-            <div className="bg-gray-800/50 rounded-xl p-6">
+            <div className="bg-white/10 backdrop-blur-md rounded-xl p-6">
               <h2 className="text-xl font-semibold mb-6">Vehicle Details</h2>
               <div className="space-y-4">
                 <div className="flex justify-between">
@@ -187,14 +195,6 @@ export default function Checkout() {
                   <span className="font-medium">{selectedVehicle.type}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-300">Seats</span>
-                  <span className="font-medium">{selectedVehicle.seats}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-300">Plate No</span>
-                  <span className="font-medium">{selectedVehicle.plateNo}</span>
-                </div>
-                <div className="flex justify-between">
                   <span className="text-gray-300">Year</span>
                   <span className="font-medium">{selectedVehicle.year}</span>
                 </div>
@@ -202,7 +202,7 @@ export default function Checkout() {
             </div>
 
             {/* Booking Details */}
-            <div className="bg-gray-800/50 rounded-xl p-6">
+            <div className="bg-white/10 backdrop-blur-md rounded-xl p-6">
               <h2 className="text-xl font-semibold mb-6">Booking Details</h2>
               <div className="space-y-4">
                 <div className="flex justify-between">
@@ -238,41 +238,32 @@ export default function Checkout() {
             </div>
 
             {/* Price Details */}
-            <div className="bg-gray-800/50 rounded-xl p-6">
+            <div className="bg-white/10 backdrop-blur-md rounded-xl p-6">
               <h2 className="text-xl font-semibold mb-6">Price Details</h2>
               <div className="space-y-4">
                 {bookingDetails.serviceType === 'taxi' ? (
-                  <>
-                    <div className="flex justify-between">
-                      <span className="text-gray-300">Price per KM</span>
-                      <span className="font-medium">Rs. {selectedVehicle.pricePerKm?.toFixed(2)}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-300">Estimated Distance</span>
-                      <span className="font-medium">13KM</span>
-                    </div>
-                  </>
+                  <div className="flex justify-between">
+                    <span className="text-gray-300">Price per KM</span>
+                    <span className="font-medium">Rs. {selectedVehicle.pricePerKm?.toFixed(2)}</span>
+                  </div>
                 ) : (
-                  <>
-                    <div className="flex justify-between">
-                      <span className="text-gray-300">Price per Day</span>
-                      <span className="font-medium">Rs. {selectedVehicle.pricePerDay?.toFixed(2)}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-300">Number of Days</span>
-                      <span className="font-medium">{bookingDetails.rentalDays}</span>
-                    </div>
-                  </>
+                  <div className="flex justify-between">
+                    <span className="text-gray-300">Price per Day</span>
+                    <span className="font-medium">Rs. {selectedVehicle.pricePerDay?.toFixed(2)}</span>
+                  </div>
                 )}
-                <div className="pt-4 border-t border-gray-600">
-                  <div className="flex justify-between text-lg">
-                    <span className="font-medium text-gray-300">Total Amount</span>
-                    <span className="font-bold text-amber-500">
-                      Rs. {bookingDetails.serviceType === 'rental'
-                        ? (selectedVehicle.pricePerDay! * bookingDetails.rentalDays!).toFixed(2)
-                        : {(selectedVehicle.pricePerKm! * 13).toFixed(2)}
-                      }
-                    </span>
+                <div className="flex justify-between">
+                  <span className="text-gray-300">Subtotal</span>
+                  <span className="font-medium">Rs. {total.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-300">Tax (10%)</span>
+                  <span className="font-medium">Rs. {tax.toFixed(2)}</span>
+                </div>
+                <div className="pt-4 border-t border-gray-700">
+                  <div className="flex justify-between text-lg font-semibold">
+                    <span>Total</span>
+                    <span>Rs. {grandTotal.toFixed(2)}</span>
                   </div>
                 </div>
               </div>
@@ -282,6 +273,6 @@ export default function Checkout() {
       </div>
 
       <Footer />
-    </main>
+    </div>
   );
 } 

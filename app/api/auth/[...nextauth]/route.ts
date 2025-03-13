@@ -1,6 +1,6 @@
 import NextAuth from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import axios from 'axios';
+import { mockAuthService } from '@/lib/mockData';
 
 const handler = NextAuth({
   providers: [
@@ -12,17 +12,17 @@ const handler = NextAuth({
       },
       async authorize(credentials) {
         try {
-          const response = await axios.post('http://localhost:8080/api/auth/login', {
-            username: credentials?.username,
-            password: credentials?.password,
-          });
-
-          if (response.data) {
-            // Return the token and any additional user data
+          const result = await mockAuthService.login(
+            credentials?.username || '',
+            credentials?.password || ''
+          );
+          
+          if (result) {
             return {
-              id: credentials?.username,
-              name: credentials?.username,
-              token: response.data
+              id: result.user.id,
+              name: result.user.name,
+              email: result.user.email,
+              accessToken: result.accessToken,
             };
           }
           return null;
@@ -36,12 +36,16 @@ const handler = NextAuth({
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.accessToken = user.token;
+        token.accessToken = user.accessToken;
+        token.id = user.id;
       }
       return token;
     },
     async session({ session, token }) {
-      session.accessToken = token.accessToken;
+      if (session.user) {
+        session.user.id = token.id as string;
+        session.accessToken = token.accessToken as string;
+      }
       return session;
     }
   },

@@ -19,9 +19,40 @@ interface BookingData {
   selectedVehicle: any;
 }
 
+const dummyBookingData: BookingData = {
+  bookingId: "GS3PA17R",
+  timestamp: new Date().toISOString(),
+  totalAmount: 385,
+  customerDetails: {
+    name: "Tharushika Dilakshan",
+    email: "tharuzika@gmail.com",
+    phone: "0788877145",
+  },
+  bookingDetails: {
+    serviceType: "taxi",
+    pickupLocation: "Bedi mawatha Akmeemana",
+    dropoffLocation: "Galle Bus Stand",
+    pickupDateTime: "2025-03-14 at 2:34 PM",
+    dropoffDateTime: "2025-03-14T11:00:00Z",
+    duration: "4 hours",
+  },
+  selectedVehicle: {
+    vehicleId: "VH-78910",
+    make: "Toyota",
+    model: "Camry",
+    year: 2022,
+    type: "CAR",
+    color: "White",
+    plateNumber: "WP ABC-1234",
+  },
+};
+
+console.log(dummyBookingData);
+
+
 export default function PaymentSuccess() {
   const router = useRouter();
-  const [bookingData, setBookingData] = useState<BookingData | null>(null);
+  const [bookingData, setBookingData] = useState<BookingData | null>(dummyBookingData);
 
   useEffect(() => {
     const data = localStorage.getItem('bookingData');
@@ -49,9 +80,9 @@ export default function PaymentSuccess() {
     router.push('/');
   };
 
-  if (!bookingData) {
-    return <div>Loading...</div>;
-  }
+  // if (!bookingData) {
+  //   return <div>Loading...</div>;
+  // }
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-gray-900 to-black text-white">
@@ -67,10 +98,11 @@ export default function PaymentSuccess() {
                 <p className="text-gray-600">Date: {new Date(bookingData.timestamp).toLocaleDateString()}</p>
               </div>
               <div className="text-right">
-                <h2 className="text-xl font-bold text-gray-800">MCC Cabs & Rentals</h2>
-                <p className="text-gray-600">123 Business Street</p>
-                <p className="text-gray-600">Colombo, Sri Lanka</p>
-                <p className="text-gray-600">Tel: +94 11 234 5678</p>
+                <h2 className="text-xl font-bold text-gray-800">Mega City Cabs</h2>
+                <p className="text-gray-600">Galle Road</p>
+                <p className="text-gray-600">Colombo 07</p>
+                <p className="text-gray-600">Tel: +94 77 5080 969</p>
+                <p className="text-gray-600">Email: info@megacitycab.com</p>
               </div>
             </div>
 
@@ -88,14 +120,15 @@ export default function PaymentSuccess() {
                   <p className="text-gray-600">Service Type: {bookingData.bookingDetails.serviceType}</p>
                   <p className="text-gray-600">Vehicle: {bookingData.selectedVehicle.make} {bookingData.selectedVehicle.model}</p>
                   <p className="text-gray-600">Vehicle Type: {bookingData.selectedVehicle.type}</p>
+                  <p className="text-gray-600">Driver Name: Thilanka Kumara</p>
                 </div>
                 <div>
                   <p className="text-gray-600">Pickup Location: {bookingData.bookingDetails.pickupLocation}</p>
                   {bookingData.bookingDetails.serviceType === 'taxi' ? (
                     <>
-                      <p className="text-gray-600">Drop-off Location: {bookingData.bookingDetails.dropLocation}</p>
-                      <p className="text-gray-600">Pickup Date: {bookingData.bookingDetails.pickupDate}</p>
-                      <p className="text-gray-600">Pickup Time: {bookingData.bookingDetails.pickupTime}</p>
+                      <p className="text-gray-600">Drop-off Location: {bookingData.bookingDetails.dropoffLocation}</p>
+                      <p className="text-gray-600">Pickup Date: {bookingData.bookingDetails.pickupDateTime}</p>
+                      {/* <p className="text-gray-600">Pickup Time: {bookingData.bookingDetails.pickupTime}</p> */}
                     </>
                   ) : (
                     <p className="text-gray-600">Rental Duration: {bookingData.bookingDetails.rentalDays} days</p>

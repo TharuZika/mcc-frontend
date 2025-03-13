@@ -2,26 +2,8 @@
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-
-const SPRING_BOOT_API = 'http://localhost:8080/api';
-
-interface Booking {
-  id: string;
-  serviceType: 'rental' | 'taxi';
-  pickupLocation: string;
-  dropLocation: string;
-  pickupDate: string;
-  pickupTime: string;
-  rentalDays?: number;
-  totalAmount: number;
-  status: string;
-  vehicle: {
-    make: string;
-    model: string;
-    type: string;
-  };
-  createdAt: string;
-}
+import { mockBookingService } from '@/lib/mockData';
+import type { Booking } from '@/lib/mockData';
 
 export default function MyBookingsPage() {
   const { data: session } = useSession();
@@ -31,25 +13,14 @@ export default function MyBookingsPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!session?.accessToken) {
+    if (!session?.user?.id) {
       router.push('/login?callbackUrl=/my-bookings');
       return;
     }
 
     const fetchBookings = async () => {
       try {
-        const response = await fetch(`${SPRING_BOOT_API}/bookings`, {
-          headers: {
-            'Authorization': `Bearer ${session.accessToken}`,
-            'Accept': 'application/json',
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to fetch bookings');
-        }
-
-        const data = await response.json();
+        const data = await mockBookingService.getUserBookings(session.user.id);
         setBookings(data);
       } catch (err: any) {
         setError(err.message || 'An error occurred while fetching your bookings');

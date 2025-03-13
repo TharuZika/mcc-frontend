@@ -57,7 +57,7 @@ export default function Footer() {
               </li>
               <li className="flex items-center">
                 <FaPhoneAlt className="text-amber-400 mr-3" />
-                <span>+1 (555) 555 1234</span>
+                <span>+94 77 5080 969</span>
               </li>
               <li className="flex items-center space-x-2">
                 <FaEnvelope className="text-amber-500" />

@@ -9,28 +9,76 @@ import VehicleCard from '@/components/vehicle/VehicleCard';
 import { bookingDetailsAtom, selectedVehicleAtom } from '@/atoms/bookingAtoms';
 
 interface Vehicle {
-  id: number;
-  type: string;
-  seats: number;
-  model: string;
-  plateNo: string;
-  make: string;
-  year: number;
-  pricePerDay: number;
-  pricePerKm: number;
-  imgUrl: string;
-  status: string;
-  rent: boolean;
-  taxi: boolean;
+  id?: number;
+  type?: string;
+  seats?: number;
+  model?: string;
+  plateNo?: string;
+  make?: string;
+  year?: number;
+  pricePerDay?: number;
+  pricePerKm?: number;
+  imgUrl?: string;
+  status?: string;
+  rent?: boolean;
+  taxi?: boolean;
 }
+
+export const vehiclesList: Vehicle[] = [
+  {
+    id: 1,
+    make: 'Toyota',
+    model: 'Camry',
+    type: 'CAR',
+    year: 2022,
+    plateNo: 'ABC-4402',
+    seats: 4,
+    pricePerDay: 5000,
+    pricePerKm: 35,
+    imgUrl: 'https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?w=500',
+    // status: "S",
+    rent: true,
+    taxi: true,
+  },
+  {
+    id: 2,
+    make: 'Honda',
+    model: 'CR-V',
+    type: 'SUV',
+    year: 2023,
+    plateNo: 'KC-1323',
+    seats: 4,
+    pricePerDay: 8000,
+    pricePerKm: 80,
+    imgUrl: 'https://images.unsplash.com/photo-1519641471654-76ce0107ad1b?w=500',
+    // status: true,
+    rent: true,
+    taxi: true,
+  },
+  {
+    id: 3,
+    make: 'Toyota',
+    model: 'Aqua',
+    type: 'CAR',
+    year: 2023,
+    plateNo: 'CAJ-2573',
+    seats: 4,
+    pricePerDay: 7000,
+    pricePerKm: 45,
+    imgUrl: 'https://global.toyota/pages/release/159747/001.jpg',
+    // status: true,
+    rent: true,
+    taxi: true,
+  },
+];
 
 export default function BookNow() {
   const router = useRouter();
   const bookingDetails = useAtomValue(bookingDetailsAtom);
   const [, setSelectedVehicle] = useAtom(selectedVehicleAtom);
   
-  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [vehicles, setVehicles] = useState<Vehicle[]>(vehiclesList);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [filters, setFilters] = useState({
     search: '',
@@ -70,9 +118,9 @@ export default function BookNow() {
     }
   };
 
-  useEffect(() => {
-    fetchVehicles();
-  }, [filters]);
+  // useEffect(() => {
+  //   fetchVehicles();
+  // }, [filters]);
 
   const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -95,7 +143,7 @@ export default function BookNow() {
   // }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-gray-900 to-black text-white">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black text-white">
       <Header />
       
       <div className="container mx-auto px-4 pt-32 pb-16">
@@ -214,6 +262,6 @@ export default function BookNow() {
       </div>
 
       <Footer />
-    </main>
+    </div>
   );
 } 

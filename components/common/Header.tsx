@@ -41,7 +41,7 @@ export default function Header() {
               </button>
               <div className="flex items-center text-amber-300 pl-4 border-l border-gray-700">
                 <FaPhoneAlt className="mr-2 animate-pulse" />
-                <span className="font-semibold">+1 (555) 555 1234</span>
+                <span className="font-semibold">+94 77 5080 969</span>
               </div>
               {session ? (
                 <div className="flex items-center space-x-4">
