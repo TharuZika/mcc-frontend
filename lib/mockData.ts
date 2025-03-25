@@ -106,47 +106,6 @@ const bookings: Booking[] = [];
 // Helper function to generate unique IDs
 const generateId = () => Math.random().toString(36).substr(2, 9);
 
-// Mock Authentication Service
-export const mockAuthService = {
-  login: async (email: string, password: string) => {
-    const user = users.find(u => u.email === email && u.password === password);
-    if (!user) {
-      throw new Error('Invalid credentials');
-    }
-    return {
-      user: { ...user, password: undefined },
-      accessToken: 'mock_token_' + generateId(),
-    };
-  },
-
-  register: async (
-    name: string, 
-    email: string, 
-    password: string,
-    drivingLicense: {
-      number: string;
-      expiryDate: string;
-      imageUrl: string;
-    }
-  ) => {
-    if (users.some(u => u.email === email)) {
-      throw new Error('Email already exists');
-    }
-    const newUser = {
-      id: generateId(),
-      name,
-      email,
-      password,
-      drivingLicense,
-    };
-    users.push(newUser);
-    return {
-      user: { ...newUser, password: undefined },
-      accessToken: 'mock_token_' + generateId(),
-    };
-  },
-};
-
 // Mock Vehicle Service
 export const mockVehicleService = {
   getAllVehicles: async () => {

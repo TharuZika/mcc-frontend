@@ -4,6 +4,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { signIn } from 'next-auth/react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { toast } from 'react-toastify';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -20,6 +21,8 @@ export default function RegisterPage() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  const basedUrl = "http://localhost:8080/api"
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -57,7 +60,7 @@ export default function RegisterPage() {
       const mockImageUrl = previewUrl || 'https://example.com/dummy-license.jpg';
 
       // Register the user using the mock service
-      const response = await fetch('/api/auth/register', {
+      const response = await fetch(`${basedUrl}/auth/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -87,6 +90,7 @@ export default function RegisterPage() {
       });
 
       if (result?.error) {
+        toast(result.error || "Registeration failed")
         throw new Error(result.error);
       }
 
@@ -95,6 +99,7 @@ export default function RegisterPage() {
     } catch (err: any) {
       setError(err.message || 'An error occurred during registration');
     } finally {
+      toast("Registeration Successfully Completed")
       setLoading(false);
     }
   };

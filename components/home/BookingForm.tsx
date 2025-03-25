@@ -45,7 +45,7 @@ export default function BookingForm() {
       serviceType: serviceType as 'taxi' | 'rental',
       pickupLocation: location,
       dropLocation: serviceType === 'taxi' ? dropLocation : undefined,
-      pickupDate: serviceType === 'taxi' ? pickupDate : undefined,
+      pickupDate:  pickupDate,
       pickupTime: serviceType === 'taxi' ? pickupTime : undefined,
       rentalDays: serviceType === 'rental' ? rentalDays : undefined,
       vehicleType
@@ -191,17 +191,32 @@ export default function BookingForm() {
             </div>
           </>
         ) : (
-          <div className="relative">
-            <label className="block text-sm font-medium mb-2 text-gray-300">Rental Duration (Days)</label>
+          <div className="grid grid-cols-2 gap-4">
             <div className="relative">
-              <FaClock className="absolute left-3 top-3 text-amber-400" />
-              <input
-                type="number"
-                min="1"
-                value={rentalDays}
-                onChange={(e) => setRentalDays(parseInt(e.target.value))}
-                className="w-full bg-white/10 border border-gray-600 text-white p-2 pl-10 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-              />
+                <label className="block text-sm font-medium mb-2 text-gray-300">Pickup Date</label>
+                <div className="relative">
+                  <FaClock className="absolute left-3 top-3 text-amber-400" />
+                  <input 
+                    type="date" 
+                    value={pickupDate}
+                    onChange={(e) => setPickupDate(e.target.value)}
+                    min={new Date().toISOString().split('T')[0]}
+                    className="w-full bg-white/10 border border-gray-600 text-white p-2 pl-10 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+            <div className="relative">
+              <label className="block text-sm font-medium mb-2 text-gray-300">Rental Duration (Days)</label>
+              <div className="relative">
+                <FaClock className="absolute left-3 top-3 text-amber-400" />
+                <input
+                  type="number"
+                  min="1"
+                  value={rentalDays}
+                  onChange={(e) => setRentalDays(parseInt(e.target.value))}
+                  className="w-full bg-white/10 border border-gray-600 text-white p-2 pl-10 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                />
+              </div>
             </div>
           </div>
         )}

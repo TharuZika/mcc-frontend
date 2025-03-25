@@ -118,9 +118,9 @@ export default function BookNow() {
     }
   };
 
-  // useEffect(() => {
-  //   fetchVehicles();
-  // }, [filters]);
+  useEffect(() => {
+    fetchVehicles();
+  }, [filters]);
 
   const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;

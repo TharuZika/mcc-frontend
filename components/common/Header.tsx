@@ -9,6 +9,11 @@ import ServiceModal from '../modals/ServiceModal';
 export default function Header() {
   const { data: session } = useSession();
   const [isServiceModalOpen, setIsServiceModalOpen] = useState(false);
+  
+  
+  const handleProfileClick = () => {
+    window.location.href = '/my-bookings';
+  }
 
   return (
     <>
@@ -46,8 +51,8 @@ export default function Header() {
               {session ? (
                 <div className="flex items-center space-x-4">
                   <div className="flex items-center text-white">
-                    <FaUser className="mr-2 text-amber-400" />
-                    <span className="font-medium">{session.user?.name}</span>
+                    <FaUser className="mr-2 text-amber-400" onClick={handleProfileClick} />
+                    <span className="font-medium">{session.user?.email}</span>
                   </div>
                   <button 
                     onClick={() => signOut({ callbackUrl: '/' })}

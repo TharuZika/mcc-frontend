@@ -20,8 +20,16 @@ export default function MyBookingsPage() {
 
     const fetchBookings = async () => {
       try {
-        const data = await mockBookingService.getUserBookings(session.user.id);
-        setBookings(data);
+        const data = await fetch(`http://localhost:8080/api/bookings`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${session.accessToken}`,
+        },
+        });
+        
+        const bookingsData = await data.json();
+        console.log (bookingsData);
+        setBookings(bookingsData);
       } catch (err: any) {
         setError(err.message || 'An error occurred while fetching your bookings');
       } finally {
@@ -67,7 +75,7 @@ export default function MyBookingsPage() {
           </div>
         ) : (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {bookings.map((booking) => (
+            {bookings && bookings.map((booking) => (
               <div
                 key={booking.id}
                 className="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-gray-700 hover:border-amber-500 transition-colors"

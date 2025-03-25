@@ -9,6 +9,22 @@ import { useRouter } from 'next/navigation';
 import { useAtomValue } from 'jotai';
 import { useSession } from 'next-auth/react';
 import { bookingDetailsAtom, selectedVehicleAtom } from '@/atoms/bookingAtoms';
+import Spinner from '@/components/common/Spinner';
+
+interface CustomerDetails {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  address: string;
+  city: string;
+  state: string;
+  zipCode: string;
+}
+
+interface CheckoutFormProps {
+  customerDetails: CustomerDetails;
+}
 
 const cardStyle = {
   style: {
@@ -29,9 +45,11 @@ const cardStyle = {
   }
 };
 
+  
+
 const SPRING_BOOT_API = 'http://localhost:8080/api'; // Update this with your Spring Boot API URL
 
-export default function CheckoutForm() {
+export default function CheckoutForm({ customerDetails }: CheckoutFormProps) {
   const stripe = useStripe();
   const elements = useElements();
   const router = useRouter();
@@ -74,7 +92,7 @@ export default function CheckoutForm() {
         : (selectedVehicle?.pricePerKm || 0) * 10; // Dummy distance for taxi
 
       // Send booking request to Spring Boot backend
-      const bookingResponse = await fetch(`${SPRING_BOOT_API}/bookings`, {
+      const bookingResponse = await fetch(`${SPRING_BOOT_API}/bookings/create`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -103,10 +121,10 @@ export default function CheckoutForm() {
           },
           totalAmount,
           customerDetails: {
-            name: 'John Doe',
-            email: 'john@example.com',
-            phone: '+1234567890',
-            address: '123 Main St, Anytown, USA',
+            name: `${customerDetails.firstName} ${customerDetails.lastName}`,
+            email: customerDetails.email,
+            phone: customerDetails.phone,
+            address: `${customerDetails.address}, ${customerDetails.city}, ${customerDetails.state} ${customerDetails.zipCode}`,
           }
         }),
       });
@@ -124,9 +142,9 @@ export default function CheckoutForm() {
         timestamp: new Date().toISOString(),
         totalAmount,
         customerDetails: {
-          name: 'John Doe',
-          email: 'john@example.com',
-          phone: '+1234567890',
+          name: `${customerDetails.firstName} ${customerDetails.lastName}`,
+          email: customerDetails.email,
+          phone: customerDetails.phone,
         },
         bookingDetails,
         selectedVehicle,
@@ -156,9 +174,16 @@ export default function CheckoutForm() {
       <button
         type="submit"
         disabled={!stripe || processing}
-        className="mt-6 w-full bg-gradient-to-r from-amber-500 to-amber-600 text-black py-4 rounded-lg font-bold hover:from-amber-600 hover:to-amber-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+        className="mt-6 w-full bg-gradient-to-r from-amber-500 to-amber-600 text-black py-4 rounded-lg font-bold hover:from-amber-600 hover:to-amber-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
       >
-        {processing ? 'Processing...' : 'Confirm Payment'}
+        {processing ? (
+          <>
+            <Spinner size="small" color="white" />
+            <span className="ml-2">Processing...</span>
+          </>
+        ) : (
+          'Confirm Payment'
+        )}
       </button>
     </form>
   );

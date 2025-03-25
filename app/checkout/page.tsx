@@ -8,6 +8,8 @@ import Header from '@/components/common/Header';
 import Footer from '@/components/common/Footer';
 import { bookingDetailsAtom, selectedVehicleAtom } from '@/atoms/bookingAtoms';
 import CheckoutForm from '@/components/checkout/CheckoutForm';
+import { toast } from 'react-toastify';
+import Spinner from '@/components/common/Spinner';
 
 // Initialize Stripe
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
@@ -27,6 +29,7 @@ export default function CheckoutPage() {
   const router = useRouter();
   const bookingDetails = useAtomValue(bookingDetailsAtom);
   const selectedVehicle = useAtomValue(selectedVehicleAtom);
+  const [isLoading, setIsLoading] = useState(true);
 
   const [customerDetails, setCustomerDetails] = useState<CustomerDetails>({
     firstName: '',
@@ -39,7 +42,15 @@ export default function CheckoutPage() {
     zipCode: ''
   });
 
-
+  // Redirect if no booking details
+  useEffect(() => {
+    if (!selectedVehicle || !bookingDetails) {
+      toast("Please select vehicle before make a booking!")
+      router.push('/');
+    } else {
+      setIsLoading(false);
+    }
+  }, [selectedVehicle, bookingDetails, router]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -48,7 +59,6 @@ export default function CheckoutPage() {
       [name]: value
     }));
   };
-
 
   // Calculate total amount
   const calculateTotal = () => {
@@ -65,6 +75,14 @@ export default function CheckoutPage() {
   const total = calculateTotal();
   const tax = total * 0.1; // 10% tax
   const grandTotal = total + tax;
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black text-white flex items-center justify-center">
+        <Spinner size="large" color="amber" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black text-white">
@@ -175,7 +193,7 @@ export default function CheckoutPage() {
             <div className="bg-white/10 backdrop-blur-md rounded-xl p-6">
               <h2 className="text-xl font-semibold mb-6">Payment Details</h2>
               <Elements stripe={stripePromise}>
-                <CheckoutForm />
+                <CheckoutForm customerDetails={customerDetails} />
               </Elements>
             </div>
           </div>
@@ -188,15 +206,15 @@ export default function CheckoutPage() {
               <div className="space-y-4">
                 <div className="flex justify-between">
                   <span className="text-gray-300">Vehicle</span>
-                  <span className="font-medium">{selectedVehicle.make} {selectedVehicle.model}</span>
+                  <span className="font-medium">{selectedVehicle?.make} {selectedVehicle?.model}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-300">Type</span>
-                  <span className="font-medium">{selectedVehicle.type}</span>
+                  <span className="font-medium">{selectedVehicle?.type}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-300">Year</span>
-                  <span className="font-medium">{selectedVehicle.year}</span>
+                  <span className="font-medium">{selectedVehicle?.year}</span>
                 </div>
               </div>
             </div>
@@ -207,31 +225,31 @@ export default function CheckoutPage() {
               <div className="space-y-4">
                 <div className="flex justify-between">
                   <span className="text-gray-300">Service Type</span>
-                  <span className="font-medium capitalize">{bookingDetails.serviceType}</span>
+                  <span className="font-medium capitalize">{bookingDetails?.serviceType}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-300">Pickup Location</span>
-                  <span className="font-medium">{bookingDetails.pickupLocation}</span>
+                  <span className="font-medium">{bookingDetails?.pickupLocation}</span>
                 </div>
-                {bookingDetails.serviceType === 'taxi' ? (
+                {bookingDetails?.serviceType === 'taxi' ? (
                   <>
                     <div className="flex justify-between">
                       <span className="text-gray-300">Drop-off Location</span>
-                      <span className="font-medium">{bookingDetails.dropLocation}</span>
+                      <span className="font-medium">{bookingDetails?.dropLocation}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-300">Pickup Date</span>
-                      <span className="font-medium">{bookingDetails.pickupDate}</span>
+                      <span className="font-medium">{bookingDetails?.pickupDate}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-300">Pickup Time</span>
-                      <span className="font-medium">{bookingDetails.pickupTime}</span>
+                      <span className="font-medium">{bookingDetails?.pickupTime}</span>
                     </div>
                   </>
                 ) : (
                   <div className="flex justify-between">
                     <span className="text-gray-300">Rental Duration</span>
-                    <span className="font-medium">{bookingDetails.rentalDays} days</span>
+                    <span className="font-medium">{bookingDetails?.rentalDays} days</span>
                   </div>
                 )}
               </div>
@@ -241,15 +259,15 @@ export default function CheckoutPage() {
             <div className="bg-white/10 backdrop-blur-md rounded-xl p-6">
               <h2 className="text-xl font-semibold mb-6">Price Details</h2>
               <div className="space-y-4">
-                {bookingDetails.serviceType === 'taxi' ? (
+                {bookingDetails?.serviceType === 'taxi' ? (
                   <div className="flex justify-between">
                     <span className="text-gray-300">Price per KM</span>
-                    <span className="font-medium">Rs. {selectedVehicle.pricePerKm?.toFixed(2)}</span>
+                    <span className="font-medium">Rs. {selectedVehicle?.pricePerKm?.toFixed(2)}</span>
                   </div>
                 ) : (
                   <div className="flex justify-between">
                     <span className="text-gray-300">Price per Day</span>
-                    <span className="font-medium">Rs. {selectedVehicle.pricePerDay?.toFixed(2)}</span>
+                    <span className="font-medium">Rs. {selectedVehicle?.pricePerDay?.toFixed(2)}</span>
                   </div>
                 )}
                 <div className="flex justify-between">
